@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:notes/constants/routes.dart';
 import 'package:notes/firebase_options.dart';
 import 'package:notes/views/login_view.dart';
 import 'package:notes/views/register_view.dart';
@@ -25,9 +26,9 @@ class MyApp extends StatelessWidget {
         title: 'LoginView',
       ),
       routes: {
-        '/login/': (context) => const LoginView(title: "Login"),
-        '/register/': (context) => const RegisterView(title: "Register"),
-        '/notes/': (context) => const NotesView(),
+        loginRoute: (context) => const LoginView(title: "Login"),
+        registerRoute: (context) => const RegisterView(title: "Register"),
+        notesRoute: (context) => const NotesView(),
       },
     );
   }
@@ -144,7 +145,10 @@ class _NotesViewState extends State<NotesView> {
                   final logout = await showLogOutDialog(context);
                   if (logout) {
                     await FirebaseAuth.instance.signOut();
-                    Navigator.of(context).pushNamedAndRemoveUntil('/login/', (_) => false);
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      loginRoute,
+                      (_) => false,
+                    );
                   }
                   break;
               }
