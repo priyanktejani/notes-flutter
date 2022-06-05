@@ -5,6 +5,7 @@ import 'package:notes/constants/routes.dart';
 import 'package:notes/firebase_options.dart';
 import 'package:notes/views/login_view.dart';
 import 'package:notes/views/register_view.dart';
+import 'package:notes/views/verify_email_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         loginRoute: (context) => const LoginView(title: "Login"),
         registerRoute: (context) => const RegisterView(title: "Register"),
         notesRoute: (context) => const NotesView(),
+        verifyEmialRoute:(context) => const VerifyEmialView(),
       },
     );
   }
@@ -88,39 +90,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class VerifyEmialView extends StatefulWidget {
-  const VerifyEmialView({Key? key}) : super(key: key);
-
-  @override
-  State<VerifyEmialView> createState() => _VerifyEmialViewState();
-}
-
-class _VerifyEmialViewState extends State<VerifyEmialView> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(children: <Widget>[
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: Text('Please Verify your email address:'),
-        ),
-        Container(
-            alignment: Alignment.center,
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: ElevatedButton(
-              onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                await user?.sendEmailVerification();
-                print(user);
-              },
-              child: const Text('Register'),
-            )),
-      ]),
-    );
-  }
-}
-
 // This is the type used by the popup menu below.
 enum Menu { logout }
 
@@ -142,7 +111,7 @@ class _NotesViewState extends State<NotesView> {
             onSelected: (value) async {
               switch (value) {
                 case Menu.logout:
-                  final logout = await showLogOutDialog(context);
+                  final logout = await logOutDialog(context);
                   if (logout) {
                     await FirebaseAuth.instance.signOut();
                     Navigator.of(context).pushNamedAndRemoveUntil(
@@ -168,7 +137,7 @@ class _NotesViewState extends State<NotesView> {
   }
 }
 
-Future<bool> showLogOutDialog(BuildContext context) {
+Future<bool> logOutDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
     builder: (context) {

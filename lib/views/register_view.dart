@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes/constants/routes.dart';
 import 'package:notes/firebase_options.dart';
+import 'package:notes/utilities/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({Key? key, required this.title}) : super(key: key);
@@ -78,22 +79,44 @@ class _RegisterViewState extends State<RegisterView> {
                               final email = _email.text;
                               final password = _password.text;
                               try {
-                                final userCredential = await FirebaseAuth
-                                    .instance
+                                await FirebaseAuth.instance
                                     .createUserWithEmailAndPassword(
                                   email: email,
                                   password: password,
                                 );
+                                final user = FirebaseAuth.instance.currentUser;
+                                await user?.sendEmailVerification();
+                                Navigator.pushNamed(
+                                  context,
+                                  verifyEmialRoute,
+                                );
                               } on FirebaseAuthException catch (e) {
                                 if (e.code == 'weak-password') {
-                                  print('Weak password');
+                                  await errorDialog(
+                                    context,
+                                    'Weak password',
+                                  );
                                 } else if (e.code == 'email-already-in-use') {
-                                  print('Email already in use');
+                                  await errorDialog(
+                                    context,
+                                    'Email already registered',
+                                  );
                                 } else if (e.code == 'invalid-email') {
-                                  print('Invalid email');
+                                  await errorDialog(
+                                    context,
+                                    'Invalid email',
+                                  );
                                 } else {
-                                  print(e);
+                                  await errorDialog(
+                                    context,
+                                    e.code.toString(),
+                                  );
                                 }
+                              } catch (e) {
+                                await errorDialog(
+                                  context,
+                                  e.toString(),
+                                );
                               }
                             },
                           )),
