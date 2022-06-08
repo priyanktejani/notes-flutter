@@ -1,8 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes/constants/routes.dart';
-import 'package:notes/firebase_options.dart';
+import 'package:notes/services/auth/auth_exceptions.dart';
+import 'package:notes/services/auth/auth_service.dart';
 import 'package:notes/utilities/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -27,119 +26,96 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextField(
+                controller: _email,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Email',
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: TextField(
+                controller: _password,
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Password',
+                ),
+              ),
+            ),
+            Container(
+                alignment: Alignment.center,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: ElevatedButton(
+                  child: const Text('Register'),
+                  onPressed: () async {
+                    final email = _email.text;
+                    final password = _password.text;
+                    try {
+                      await AuthService.firebase().creatrUser(
+                        email: email,
+                        password: password,
+                      );
+                      await AuthService.firebase().sendEmailVerification();
+                      Navigator.pushNamed(
+                        context,
+                        verifyEmialRoute,
+                      );
+                    } on WeekPasswordException {
+                      await errorDialog(
+                        context,
+                        'Weak password',
+                      );
+                    } on EmailAlreadyInUseException {
+                      await errorDialog(
+                        context,
+                        'Email already registered',
+                      );
+                    } on InvalidEmailException {
+                      await errorDialog(
+                        context,
+                        'Invalid email',
+                      );
+                    } on GenericAuthException {
+                      await errorDialog(
+                        context,
+                        'Failed to register',
+                      );
+                    }
+                  },
+                )),
+            Container(
+              alignment: Alignment.center,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    loginRoute,
+                    (route) => false,
+                  );
+                },
+                child: const Text("Login"),
+              ),
+            )
+          ],
         ),
-        body: FutureBuilder(
-          future: Firebase.initializeApp(
-            options: DefaultFirebaseOptions.currentPlatform,
-          ),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 16),
-                        child: TextField(
-                          controller: _email,
-                          autocorrect: false,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter Email',
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        child: TextField(
-                          controller: _password,
-                          obscureText: true,
-                          enableSuggestions: false,
-                          autocorrect: false,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter Password',
-                          ),
-                        ),
-                      ),
-                      Container(
-                          alignment: Alignment.center,
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          child: ElevatedButton(
-                            child: const Text('Register'),
-                            onPressed: () async {
-                              final email = _email.text;
-                              final password = _password.text;
-                              try {
-                                await FirebaseAuth.instance
-                                    .createUserWithEmailAndPassword(
-                                  email: email,
-                                  password: password,
-                                );
-                                final user = FirebaseAuth.instance.currentUser;
-                                await user?.sendEmailVerification();
-                                Navigator.pushNamed(
-                                  context,
-                                  verifyEmialRoute,
-                                );
-                              } on FirebaseAuthException catch (e) {
-                                if (e.code == 'weak-password') {
-                                  await errorDialog(
-                                    context,
-                                    'Weak password',
-                                  );
-                                } else if (e.code == 'email-already-in-use') {
-                                  await errorDialog(
-                                    context,
-                                    'Email already registered',
-                                  );
-                                } else if (e.code == 'invalid-email') {
-                                  await errorDialog(
-                                    context,
-                                    'Invalid email',
-                                  );
-                                } else {
-                                  await errorDialog(
-                                    context,
-                                    e.code.toString(),
-                                  );
-                                }
-                              } catch (e) {
-                                await errorDialog(
-                                  context,
-                                  e.toString(),
-                                );
-                              }
-                            },
-                          )),
-                      Container(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              loginRoute,
-                              (route) => false,
-                            );
-                          },
-                          child: const Text("Login"),
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              default:
-                return const Text("Loading...");
-            }
-          },
-        ));
+      ),
+    );
   }
 
   @override

@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes/constants/routes.dart';
+import 'package:notes/services/auth/auth_service.dart';
 
 class VerifyEmialView extends StatefulWidget {
   const VerifyEmialView({Key? key}) : super(key: key);
@@ -29,8 +29,7 @@ class _VerifyEmialViewState extends State<VerifyEmialView> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: ElevatedButton(
                 onPressed: () async {
-                  final user = FirebaseAuth.instance.currentUser;
-                  await user?.sendEmailVerification();
+                  await AuthService.firebase().sendEmailVerification();
                 },
                 child: const Text('Resend email verification'),
               ),
@@ -39,7 +38,7 @@ class _VerifyEmialViewState extends State<VerifyEmialView> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: TextButton(
                 onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
+                  await AuthService.firebase().logout();
                   Navigator.pushNamed(context, registerRoute);
                 },
                 child: const Text('Change email'),
