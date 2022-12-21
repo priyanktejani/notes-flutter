@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:notes/utilities/generic_dialog.dart';
 
-Future<void> errorDialog(BuildContext context, String errorMessage) {
-  return showDialog(
+Future<void> showErrorDialog(
+  BuildContext context,
+  String text,
+) {
+  return showGenericDialog<void>(
     context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Error'),
-        content: Text(errorMessage),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Ok'),
-          ),
-        ],
-      );
+    title: 'An error occurred',
+    content: text,
+    optionsBuilder: () => {
+      'OK': null,
     },
   );
 }

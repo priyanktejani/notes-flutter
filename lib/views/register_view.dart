@@ -78,22 +78,22 @@ class _RegisterViewState extends State<RegisterView> {
                         verifyEmialRoute,
                       );
                     } on WeekPasswordException {
-                      await errorDialog(
+                      await showErrorDialog(
                         context,
                         'Weak password',
                       );
                     } on EmailAlreadyInUseException {
-                      await errorDialog(
+                      await showErrorDialog(
                         context,
                         'Email already registered',
                       );
                     } on InvalidEmailException {
-                      await errorDialog(
+                      await showErrorDialog(
                         context,
                         'Invalid email',
                       );
                     } on GenericAuthException {
-                      await errorDialog(
+                      await showErrorDialog(
                         context,
                         'Failed to register',
                       );
